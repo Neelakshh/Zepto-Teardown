@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zepto Product Teardown — Neelaksh Chouhan</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --zepto-purple: #6C2BD9;
+    --zepto-pink: #FF3CAC;
+    --zepto-yellow: #FFD60A;
+    --bg: #0A0A0F;
+    --surface: #13131A;
+    --surface2: #1C1C27;
+    --text: #F0F0F5;
+    --muted: #8888A0;
+    --border: rgba(255,255,255,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 72px 0 56px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(108,43,217,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,60,172,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(108,43,217,0.15);
+    border: 1px solid rgba(108,43,217,0.3);
+    color: #A78BFA;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+
+  .tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #A78BFA;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(38px, 6vw, 58px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, #A78BFA, #FF3CAC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 24px;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .hero-meta-item strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .divider {
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--zepto-purple), var(--zepto-pink));
+    border-radius: 2px;
+    margin: 40px 0;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 56px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.2s; }
+  .section:nth-child(4) { animation-delay: 0.3s; }
+  .section:nth-child(5) { animation-delay: 0.4s; }
+  .section:nth-child(6) { animation-delay: 0.5s; }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--zepto-pink);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 60px;
+  }
+
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .section p {
+    font-size: 15px;
+    color: #C8C8D8;
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover {
+    border-color: rgba(108,43,217,0.3);
+    transform: translateY(-2px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--zepto-purple), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* PERSONAS */
+  .persona-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .persona {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    transition: transform 0.2s;
+  }
+
+  .persona:hover { transform: translateY(-3px); }
+
+  .persona-emoji {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .persona h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .persona p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* METRICS */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+  }
+
+  .metric-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #A78BFA, #FF3CAC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .metric-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* HIGHLIGHT BOX */
+  .highlight {
+    background: linear-gradient(135deg, rgba(108,43,217,0.12), rgba(255,60,172,0.08));
+    border: 1px solid rgba(108,43,217,0.25);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+
+  .highlight h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #C4B5FD;
+  }
+
+  .highlight p {
+    font-size: 14px;
+    color: #C8C8D8;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  /* FEATURE PROPOSAL */
+  .proposal {
+    background: var(--surface2);
+    border: 1px solid rgba(255, 214, 10, 0.15);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .proposal-tag {
+    display: inline-block;
+    background: rgba(255,214,10,0.1);
+    color: var(--zepto-yellow);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,214,10,0.2);
+    margin-bottom: 14px;
+  }
+
+  .proposal h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .proposal p {
+    font-size: 14px;
+    color: #C8C8D8;
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .proposal-steps {
+    list-style: none;
+    margin-top: 16px;
+  }
+
+  .proposal-steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #C8C8D8;
+  }
+
+  .step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255,214,10,0.15);
+    color: var(--zepto-yellow);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 16px;
+  }
+
+  .author {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .author-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--zepto-purple), var(--zepto-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+  }
+
+  .author-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .author-title {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--zepto-purple), var(--zepto-pink));
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .cta:hover { opacity: 0.85; transform: scale(1.02); }
+
+  @media (max-width: 600px) {
+    .hero { padding: 48px 0 40px; }
+    .footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="tag">Product Teardown</div>
+    <h1>Why Zepto isn't just<br>a <span>delivery app</span> —<br>it's a behaviour engine.</h1>
+    <div class="hero-meta">
+      <div class="hero-meta-item">📦 <strong>Zepto</strong></div>
+      <div class="hero-meta-item">🏷️ <strong>Quick Commerce · B2C</strong></div>
+      <div class="hero-meta-item">✍️ By <strong>Neelaksh Chouhan</strong></div>
+      <div class="hero-meta-item">📅 <strong>2025</strong></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- WHAT IS ZEPTO -->
+  <div class="section">
+    <div class="section-label">01 — The Product</div>
+    <h2>What Zepto actually sells</h2>
+    <p>On the surface, Zepto is a 10-minute grocery delivery app. But that framing undersells it. What Zepto is really selling is <strong>the elimination of planning</strong>. It turns grocery shopping from a scheduled task into an impulse-friendly, zero-friction behaviour.</p>
+    <p>That's a fundamentally different product thesis from BigBasket (scheduled abundance) or Blinkit (scale-first). Zepto's entire UX, dark store network, and SKU curation is built around one insight: <em>if you remove the friction, frequency explodes.</em></p>
+  </div>
+
+  <!-- USER PERSONAS -->
+  <div class="section">
+    <div class="section-label">02 — The Users</div>
+    <h2>Who actually uses this</h2>
+    <div class="persona-grid">
+      <div class="persona">
+        <span class="persona-emoji">👩‍💻</span>
+        <h4>The Urban Professional</h4>
+        <p>25–35, no time to plan. Orders at 10pm when they realize there's no milk. High AOV, high frequency.</p>
+      </div>
+      <div class="persona">
+        <span class="persona-emoji">🏠</span>
+        <h4>The Home Cook</h4>
+        <p>Missing one ingredient mid-recipe. Values speed over price. Zepto is their "kitchen insurance."</p>
+      </div>
+      <div class="persona">
+        <span class="persona-emoji">🎓</span>
+        <h4>The College Student</h4>
+        <p>Late-night snacks, instant noodles, energy drinks. Low AOV but very high frequency. Brand sticky early.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT WORKS -->
+  <div class="section">
+    <div class="section-label">03 — What Works</div>
+    <h2>Three things Zepto gets exactly right</h2>
+
+    <div class="card">
+      <h3>⚡ The 10-minute promise as a north star</h3>
+      <p>Every product decision — dark store density, SKU count cap (~5,000 vs BigBasket's 40,000+), picker training — flows from one constraint: 10 minutes. This is exceptional product discipline. When your promise has a number, trade-offs become easy.</p>
+    </div>
+
+    <div class="card">
+      <h3>🎯 Smart SKU curation reduces decision fatigue</h3>
+      <p>By stocking only fast-moving SKUs, Zepto accidentally solves the paradox of choice. Users find what they need in 2–3 taps. This improves conversion rates AND reduces dark store complexity. A win that looks like a limitation.</p>
+    </div>
+
+    <div class="card">
+      <h3>💳 Zepto Pass — the loyalty flywheel</h3>
+      <p>Free delivery subscription drives frequency. Higher frequency drives dark store utilisation. Better utilisation justifies denser store networks. Denser stores improve delivery times. Better times drive more subscriptions. This is a well-constructed flywheel that competitors underestimated.</p>
+    </div>
+  </div>
+
+  <!-- KEY METRICS -->
+  <div class="section">
+    <div class="section-label">04 — Metrics That Matter</div>
+    <h2>How I'd measure success</h2>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-value">D30</span>
+        <div class="metric-label">Retention Rate</div>
+      </div>
+      <div class="metric-card">
+        <span class="metric-value">AOV</span>
+        <div class="metric-label">Avg Order Value</div>
+      </div>
+      <div class="metric-card">
+        <span class="metric-value">Fill%</span>
+        <div class="metric-label">SKU Fill Rate</div>
+      </div>
+      <div class="metric-card">
+        <span class="metric-value">SLA%</span>
+        <div class="metric-label">On-time Delivery</div>
+      </div>
+    </div>
+    <br>
+    <div class="highlight">
+      <h3>The metric I'd watch most: Orders per user per month</h3>
+      <p>Zepto's unit economics only work at high frequency. A user ordering 2x/month is marginal. A user ordering 8x/month is profitable. Everything — Pass, notifications, reorder nudges — should be optimised toward increasing this single number. If this is growing, everything else follows.</p>
+    </div>
+  </div>
+
+  <!-- ONE PROBLEM -->
+  <div class="section">
+    <div class="section-label">05 — The Gap</div>
+    <h2>The one problem Zepto hasn't solved</h2>
+    <div class="card">
+      <h3>🧠 Zepto doesn't know your kitchen</h3>
+      <p>After 50 orders, Zepto still shows you the same generic homepage as a new user. It doesn't know you always buy eggs on Sunday, or that you're lactose intolerant, or that you run out of cooking oil every 3 weeks. The app captures massive behavioural data but doesn't personalise the experience beyond basic "reorder" nudges. This is the biggest untapped value in the product.</p>
+    </div>
+  </div>
+
+  <!-- FEATURE PROPOSAL -->
+  <div class="section">
+    <div class="section-label">06 — Feature Proposal</div>
+    <h2>What I'd build next</h2>
+
+    <div class="proposal">
+      <div class="proposal-tag">New Feature Concept</div>
+      <h3>Zepto Pantry Intelligence</h3>
+      <p>A predictive replenishment layer that learns your household consumption patterns and proactively surfaces "you're probably running low on X" nudges at the right moment — not as spam, but as genuinely useful reminders.</p>
+
+      <ul class="proposal-steps">
+        <li>
+          <span class="step-num">1</span>
+          <span><strong>Consumption modelling:</strong> Use order history to estimate how long each product lasts per household. Eggs ordered every 10 days → prompt on day 8.</span>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <span><strong>Smart bundle nudge:</strong> "You usually buy these together — add to cart?" shown at checkout. Increases AOV without feeling pushy.</span>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <span><strong>Weekly Pantry Summary:</strong> Sunday push notification — "Here's what your kitchen likely needs this week." One-tap add to cart. Drives planned + impulsive orders simultaneously.</span>
+        </li>
+      </ul>
+
+      <p style="margin-top: 16px;"><strong>Why this works:</strong> It shifts Zepto from reactive (user remembers → opens app → orders) to proactive (Zepto reminds → user opens → orders). This increases order frequency without increasing CAC — the most capital-efficient growth possible.</p>
+
+      <p><strong>Success metric:</strong> % of orders initiated from a Pantry nudge. Target: 15% of monthly orders within 6 months of launch.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="author">
+      <div class="author-avatar">NC</div>
+      <div>
+        <div class="author-name">Neelaksh Chouhan</div>
+        <div class="author-title">CS Student · Full Stack Dev · Aspiring PM</div>
+      </div>
+    </div>
+    <button class="cta" onclick="window.print()">Save as PDF ↗</button>
+  </div>
+
+</div>
+
+</body>
+</html>
